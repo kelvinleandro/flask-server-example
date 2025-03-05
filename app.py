@@ -140,15 +140,25 @@ def upload_file():
 
         # Processa a imagem e obtém os contornos
         _, todos_contornos = aplicar_otsu(dicom_data)
-        contornos_validos = {key: value for key, value in todos_contornos.items() if random() < 0.2}
-
+        contornos_validos = {
+            key: value for key, value in todos_contornos.items() if random() < 0.7
+        }
 
         rotated_image = cv2.rotate(dicom_data, cv2.ROTATE_90_COUNTERCLOCKWISE)
         # Convert the rotated image to Base64
         _, buffer = cv2.imencode(".png", rotated_image)
         base64_image = base64.b64encode(buffer).decode("utf-8")
 
-        return jsonify({"preprocessed": base64_image, "valid_contours": contornos_validos, "todos_contornos": todos_contornos}), 200
+        return (
+            jsonify(
+                {
+                    "preprocessed": base64_image,
+                    "valid_contours": contornos_validos,
+                    "todos_contornos": todos_contornos,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
