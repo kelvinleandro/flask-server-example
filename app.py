@@ -4,6 +4,7 @@ import pydicom
 import numpy as np
 import base64
 import cv2
+from random import random
 
 
 def carregar_imagem(input_path: str) -> np.ndarray:
@@ -138,14 +139,16 @@ def upload_file():
         dicom_data = apply_window(dicom_data)
 
         # Processa a imagem e obtém os contornos
-        _, contornos_dict = aplicar_otsu(dicom_data)
+        _, todos_contornos = aplicar_otsu(dicom_data)
+        contornos_validos = {key: value for key, value in todos_contornos.items() if random() < 0.2}
+
 
         rotated_image = cv2.rotate(dicom_data, cv2.ROTATE_90_COUNTERCLOCKWISE)
         # Convert the rotated image to Base64
         _, buffer = cv2.imencode(".png", rotated_image)
         base64_image = base64.b64encode(buffer).decode("utf-8")
 
-        return jsonify({"preprocessed": base64_image, "contours": contornos_dict}), 200
+        return jsonify({"preprocessed": base64_image, "valid_contours": contornos_validos, "todos_contornos": todos_contornos}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
